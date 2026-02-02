@@ -339,10 +339,16 @@ function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
           />
         </div>
 
-        <Button onClick={() => setShowAnalysis(true)} className="gap-2">
-          <Sparkles className="w-4 h-4" />
-          Analyze Team with AI
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setShowAnalysis(true)} variant="outline" className="gap-2">
+            <Sparkles className="w-4 h-4" />
+            Analyze Team with AI
+          </Button>
+          <Button onClick={onAdvance} className="gap-2">
+            Next Stage
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* AI Analysis Sidebar */}
