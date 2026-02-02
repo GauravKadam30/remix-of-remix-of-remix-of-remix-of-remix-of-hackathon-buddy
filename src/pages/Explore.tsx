@@ -12,7 +12,8 @@ import {
   Building,
   Trophy,
   Star,
-  ChevronDown
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -336,9 +337,13 @@ export default function Explore() {
 
                 {/* CTA */}
                 <div className="flex gap-2 md:ml-4">
-                  <Button className="gap-2">
+                  <Button variant="outline" className="gap-2">
                     View Details
                     <ExternalLink className="w-4 h-4" />
+                  </Button>
+                  <Button className="gap-2">
+                    Start Project
+                    <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
