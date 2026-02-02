@@ -18,7 +18,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useAI } from "@/contexts/AIContext";
+
 
 interface Project {
   id: number;
@@ -68,7 +68,6 @@ const stages = [
 export default function Workspace() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { setIsOpen, setOpenWithMessage } = useAI();
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
 
@@ -81,8 +80,8 @@ export default function Workspace() {
       
       // Create a new project
       const newProject: Project = {
-        id: Date.now(), // Use timestamp as unique ID
-        name: "New Project", // User can rename later
+        id: Date.now(),
+        name: "New Project",
         hackathon: hackathonName,
         stage: 1,
         stageLabel: "Manage Team",
@@ -95,13 +94,10 @@ export default function Workspace() {
       setProjects(prev => [newProject, ...prev]);
       setSelectedProject(newProject.id);
       
-      // Open AI Co-Pilot with welcome message
-      setOpenWithMessage(`I've created a new project for "${hackathonName}". You have ${daysLeft} days until the deadline (${deadline}).`);
-      
       // Clear the navigation state to prevent re-creating on refresh
       navigate(location.pathname, { replace: true, state: null });
     }
-  }, [location.state, navigate, location.pathname, setIsOpen, setOpenWithMessage]);
+  }, [location.state, navigate, location.pathname]);
 
   if (selectedProject) {
     const project = projects.find(p => p.id === selectedProject);
