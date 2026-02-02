@@ -80,10 +80,6 @@ export default function Workspace() {
               Manage your hackathon projects with AI-powered assistance
             </motion.p>
           </div>
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" />
-            New Project
-          </Button>
         </div>
 
         {/* Projects Grid */}
@@ -155,23 +151,6 @@ export default function Workspace() {
             </motion.div>
           ))}
 
-          {/* Create New Project Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-card/50 border border-dashed border-border rounded-xl p-6 flex flex-col items-center justify-center min-h-[200px] hover:border-primary/30 transition-all cursor-pointer group"
-          >
-            <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-              <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-            </div>
-            <h3 className="font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-              Start a New Project
-            </h3>
-            <p className="text-sm text-muted-foreground text-center mt-1">
-              Join a hackathon and let AI guide you
-            </p>
-          </motion.div>
         </div>
       </div>
     </MainLayout>
