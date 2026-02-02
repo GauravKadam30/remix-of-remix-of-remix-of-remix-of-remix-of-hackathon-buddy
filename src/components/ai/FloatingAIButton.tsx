@@ -1,12 +1,24 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, Send, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAI } from "@/contexts/AIContext";
 
 export function FloatingAIButton() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState("");
+  const { isOpen, setIsOpen, openWithMessage, setOpenWithMessage } = useAI();
+
+  // Auto-open when there's a message to show
+  useEffect(() => {
+    if (openWithMessage) {
+      setIsOpen(true);
+    }
+  }, [openWithMessage, setIsOpen]);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setOpenWithMessage(undefined);
+  };
 
   return (
     <>
@@ -36,7 +48,7 @@ export function FloatingAIButton() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="fixed inset-0 z-50 bg-background/50 backdrop-blur-sm"
             />
 
@@ -62,7 +74,7 @@ export function FloatingAIButton() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleClose}
                   className="rounded-full"
                 >
                   <X className="w-5 h-5" />
@@ -77,16 +89,39 @@ export function FloatingAIButton() {
                     <Sparkles className="w-4 h-4 text-primary" />
                   </div>
                   <div className="glass rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
-                    <p className="text-sm">
-                      Hey! 👋 I'm your AI Co-Pilot. I can help you with:
-                    </p>
-                    <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                      <li>• Finding the perfect hackathon</li>
-                      <li>• Building your dream team</li>
-                      <li>• Research & ideation</li>
-                      <li>• Project planning & execution</li>
-                    </ul>
-                    <p className="text-sm mt-2">What would you like to work on?</p>
+                    {openWithMessage ? (
+                      <>
+                        <p className="text-sm font-medium mb-2">
+                          🎉 Project Created!
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {openWithMessage}
+                        </p>
+                        <p className="text-sm mt-3">
+                          I can help you with:
+                        </p>
+                        <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                          <li>• Building your dream team</li>
+                          <li>• Researching the problem space</li>
+                          <li>• Brainstorming innovative ideas</li>
+                          <li>• Creating your PRD</li>
+                        </ul>
+                        <p className="text-sm mt-2">What would you like to start with?</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm">
+                          Hey! 👋 I'm your AI Co-Pilot. I can help you with:
+                        </p>
+                        <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                          <li>• Finding the perfect hackathon</li>
+                          <li>• Building your dream team</li>
+                          <li>• Research & ideation</li>
+                          <li>• Project planning & execution</li>
+                        </ul>
+                        <p className="text-sm mt-2">What would you like to work on?</p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -97,8 +132,6 @@ export function FloatingAIButton() {
                   <div className="flex-1 relative">
                     <input
                       type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
                       placeholder="Ask anything..."
                       className="w-full bg-secondary/50 border border-border rounded-full px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
                     />
@@ -109,7 +142,6 @@ export function FloatingAIButton() {
                   <Button
                     size="icon"
                     className="rounded-full w-12 h-12"
-                    disabled={!message.trim()}
                   >
                     <Send className="w-5 h-5" />
                   </Button>
