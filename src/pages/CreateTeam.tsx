@@ -120,22 +120,38 @@ export default function CreateTeam() {
     <MainLayout>
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold mb-2"
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold mb-2"
+            >
+              Find Your <span className="text-gradient">Dream Team</span>
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-muted-foreground"
+            >
+              Discover talented teammates with the skills you need to win
+            </motion.p>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
           >
-            Find Your <span className="text-gradient">Dream Team</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-muted-foreground"
-          >
-            Discover talented teammates with the skills you need to win
-          </motion.p>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate('/messages')}
+              className="relative"
+            >
+              <MessageCircle className="w-5 h-5" />
+            </Button>
+          </motion.div>
         </div>
 
         {/* Search & Filters */}
