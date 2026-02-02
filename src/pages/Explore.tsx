@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Search, 
@@ -119,8 +120,23 @@ const platformColors: Record<string, string> = {
 };
 
 export default function Explore() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+
+  const handleStartProject = (hackathon: typeof hackathons[0]) => {
+    // Navigate to workspace with hackathon data to create a new project
+    navigate("/workspace", { 
+      state: { 
+        newProject: {
+          hackathonId: hackathon.id,
+          hackathonName: hackathon.name,
+          deadline: hackathon.deadline,
+          daysLeft: hackathon.daysLeft,
+        }
+      }
+    });
+  };
 
   return (
     <MainLayout>
@@ -341,7 +357,10 @@ export default function Explore() {
                     View Details
                     <ExternalLink className="w-4 h-4" />
                   </Button>
-                  <Button className="gap-2">
+                  <Button 
+                    className="gap-2"
+                    onClick={() => handleStartProject(hackathon)}
+                  >
                     Start Project
                     <ChevronRight className="w-4 h-4" />
                   </Button>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Plus,
@@ -18,7 +19,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const projects = [
+interface Project {
+  id: number;
+  name: string;
+  hackathon: string;
+  stage: number;
+  stageLabel: string;
+  members: number;
+  deadline: string;
+  daysLeft: number;
+  progress: number;
+}
+
+const initialProjects: Project[] = [
   {
     id: 1,
     name: "AI Mental Health Companion",
@@ -52,10 +65,44 @@ const stages = [
 ];
 
 export default function Workspace() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
 
+  // Handle new project from Explore page
+  useEffect(() => {
+    const state = location.state as { newProject?: { hackathonId: number; hackathonName: string; deadline: string; daysLeft: number } } | null;
+    
+    if (state?.newProject) {
+      const { hackathonName, deadline, daysLeft } = state.newProject;
+      
+      // Create a new project
+      const newProject: Project = {
+        id: Date.now(), // Use timestamp as unique ID
+        name: "New Project", // User can rename later
+        hackathon: hackathonName,
+        stage: 1,
+        stageLabel: "Manage Team",
+        members: 1,
+        deadline,
+        daysLeft,
+        progress: 0,
+      };
+      
+      setProjects(prev => [newProject, ...prev]);
+      setSelectedProject(newProject.id);
+      
+      // Clear the navigation state to prevent re-creating on refresh
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state, navigate, location.pathname]);
+
   if (selectedProject) {
-    return <ProjectWorkspace projectId={selectedProject} onBack={() => setSelectedProject(null)} />;
+    const project = projects.find(p => p.id === selectedProject);
+    if (project) {
+      return <ProjectWorkspace projectId={selectedProject} project={project} onBack={() => setSelectedProject(null)} />;
+    }
   }
 
   return (
@@ -160,13 +207,12 @@ export default function Workspace() {
 // Project Workspace Component
 interface ProjectWorkspaceProps {
   projectId: number;
+  project: Project;
   onBack: () => void;
 }
 
-function ProjectWorkspace({ projectId, onBack }: ProjectWorkspaceProps) {
-  const [currentStage, setCurrentStage] = useState(3);
-  
-  const project = projects.find(p => p.id === projectId) || projects[0];
+function ProjectWorkspace({ project, onBack }: ProjectWorkspaceProps) {
+  const [currentStage, setCurrentStage] = useState(project.stage);
 
   return (
     <MainLayout>
