@@ -802,7 +802,7 @@ An AI-powered mental health companion app that provides personalized emotional s
 
 // Stage 5: Implementation
 function ImplementationStage() {
-  const tasks = [
+  const [tasks, setTasks] = useState([
     { id: 1, member: "Alex Chen", role: "Full Stack", tasks: [
       { name: "Set up project structure", done: true },
       { name: "Configure authentication", done: true },
@@ -823,7 +823,20 @@ function ImplementationStage() {
       { name: "Set up Supabase", done: true },
       { name: "Implement RLS policies", done: false },
     ]},
-  ];
+  ]);
+
+  const toggleTask = (memberId: number, taskIndex: number) => {
+    setTasks(prev => prev.map(member => 
+      member.id === memberId 
+        ? {
+            ...member,
+            tasks: member.tasks.map((task, i) => 
+              i === taskIndex ? { ...task, done: !task.done } : task
+            )
+          }
+        : member
+    ));
+  };
 
   const totalTasks = tasks.reduce((acc, m) => acc + m.tasks.length, 0);
   const completedTasks = tasks.reduce((acc, m) => acc + m.tasks.filter(t => t.done).length, 0);
@@ -871,17 +884,21 @@ function ImplementationStage() {
             </div>
             <div className="space-y-2">
               {member.tasks.map((task, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 bg-secondary/50 rounded-lg">
+                <button
+                  key={i}
+                  onClick={() => toggleTask(member.id, i)}
+                  className="flex items-center gap-2 p-2 bg-secondary/50 rounded-lg w-full text-left hover:bg-secondary/70 transition-colors"
+                >
                   <div className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center shrink-0",
-                    task.done ? "bg-success" : "border border-muted-foreground"
+                    "w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors",
+                    task.done ? "bg-success" : "border border-muted-foreground hover:border-primary"
                   )}>
                     {task.done && <CheckCircle2 className="w-3 h-3 text-success-foreground" />}
                   </div>
-                  <span className={cn("text-sm", task.done && "line-through text-muted-foreground")}>
+                  <span className={cn("text-sm transition-all", task.done && "line-through text-muted-foreground")}>
                     {task.name}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
