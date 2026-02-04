@@ -30,7 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast, useToast } from "@/hooks/use-toast";
 
 
 interface Project {
@@ -704,13 +704,66 @@ function IdeationStage({ onAdvance }: { onAdvance: () => void }) {
 
 // Stage 4: PRD
 function PRDStage({ onAdvance }: { onAdvance: () => void }) {
+  const { toast } = useToast();
+
+  const prdContent = `# AI Mental Health Companion - PRD
+
+## Overview
+An AI-powered mental health companion app that provides personalized emotional support, coping strategies, and resources to users experiencing stress, anxiety, or mild depression.
+
+## Technical Architecture
+- Frontend: React + TypeScript + Tailwind CSS
+- Backend: Node.js + Express + PostgreSQL
+- AI: OpenAI GPT-4 API for NLP
+- Infrastructure: Vercel + Supabase
+
+## Core Features
+- AI-powered chat interface with empathetic responses
+- Mood tracking and sentiment analysis
+- Personalized coping strategies
+- Resource recommendations
+- Progress tracking dashboard`;
+
+  const handleDownload = () => {
+    const blob = new Blob([prdContent], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "AI-Mental-Health-Companion-PRD.md";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({
+      title: "PRD Downloaded",
+      description: "The PRD has been saved as a markdown file.",
+    });
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link Copied",
+        description: "The workspace link has been copied to your clipboard.",
+      });
+    } catch {
+      toast({
+        title: "Share Failed",
+        description: "Unable to copy link. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-semibold">Product Requirements Document</h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Download</Button>
-          <Button variant="outline" size="sm">Share</Button>
+          <Button variant="outline" size="sm" onClick={handleDownload}>Download</Button>
+          <Button variant="outline" size="sm" onClick={handleShare}>Share</Button>
         </div>
       </div>
       
