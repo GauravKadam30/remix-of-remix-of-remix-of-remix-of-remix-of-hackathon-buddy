@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { 
   Search, 
   Filter, 
@@ -113,8 +114,37 @@ const experienceColors: Record<string, string> = {
 
 export default function CreateTeam() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
+
+  // Debounce search query with loading state
+  useEffect(() => {
+    if (searchQuery !== debouncedQuery) {
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        setDebouncedQuery(searchQuery);
+        setIsSearching(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchQuery, debouncedQuery]);
+
+  // Filter users based on search query
+  const filteredUsers = useMemo(() => {
+    if (!debouncedQuery.trim()) return users;
+    
+    const query = debouncedQuery.toLowerCase();
+    return users.filter((user) => 
+      user.name.toLowerCase().includes(query) ||
+      user.role.toLowerCase().includes(query) ||
+      user.skills.some(skill => skill.toLowerCase().includes(query)) ||
+      user.location.toLowerCase().includes(query) ||
+      user.bio.toLowerCase().includes(query) ||
+      user.experience.toLowerCase().includes(query)
+    );
+  }, [debouncedQuery]);
 
   return (
     <MainLayout>
@@ -163,14 +193,26 @@ export default function CreateTeam() {
         >
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            {isSearching ? (
+              <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary animate-spin" />
+            ) : (
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            )}
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search teammates... (e.g., 'Frontend developer with React experience')"
-              className="w-full bg-card border border-border rounded-xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
+              className="w-full bg-card border border-border rounded-xl pl-12 pr-12 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ×
+              </button>
+            )}
           </div>
 
           {/* Filter Toggle & Sort */}
@@ -269,9 +311,63 @@ export default function CreateTeam() {
           )}
         </motion.div>
 
+        {/* Results Count */}
+        {debouncedQuery && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-4 text-sm text-muted-foreground"
+          >
+            Found <span className="text-foreground font-medium">{filteredUsers.length}</span> {filteredUsers.length === 1 ? 'teammate' : 'teammates'} matching "{debouncedQuery}"
+          </motion.div>
+        )}
+
+        {/* Loading State */}
+        {isSearching && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-card border border-border rounded-xl p-6 animate-pulse">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-14 h-14 rounded-full bg-muted" />
+                  <div className="flex-1">
+                    <div className="h-4 bg-muted rounded w-24 mb-2" />
+                    <div className="h-3 bg-muted rounded w-32" />
+                  </div>
+                </div>
+                <div className="h-3 bg-muted rounded w-full mb-2" />
+                <div className="h-3 bg-muted rounded w-3/4 mb-4" />
+                <div className="flex gap-2 mb-4">
+                  <div className="h-6 bg-muted rounded w-16" />
+                  <div className="h-6 bg-muted rounded w-16" />
+                  <div className="h-6 bg-muted rounded w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isSearching && filteredUsers.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16"
+          >
+            <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+              <Search className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No teammates found</h3>
+            <p className="text-muted-foreground mb-4">Try adjusting your search or filters</p>
+            <Button variant="outline" onClick={() => setSearchQuery("")}>
+              Clear Search
+            </Button>
+          </motion.div>
+        )}
+
         {/* User Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {users.map((user, index) => (
+        {!isSearching && filteredUsers.length > 0 && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredUsers.map((user, index) => (
             <motion.div
               key={user.id}
               initial={{ opacity: 0, y: 20 }}
@@ -353,14 +449,17 @@ export default function CreateTeam() {
               </Button>
             </motion.div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Load More */}
-        <div className="text-center mt-8">
-          <Button variant="outline" size="lg">
-            Load More Teammates
-          </Button>
-        </div>
+        {!isSearching && filteredUsers.length > 0 && (
+          <div className="text-center mt-8">
+            <Button variant="outline" size="lg">
+              Load More Teammates
+            </Button>
+          </div>
+        )}
       </div>
     </MainLayout>
   );
