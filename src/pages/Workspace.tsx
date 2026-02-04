@@ -761,10 +761,7 @@ An AI-powered mental health companion app that provides personalized emotional s
     <div className="bg-card border border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-semibold">Product Requirements Document</h3>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleDownload}>Download</Button>
-          <Button variant="outline" size="sm" onClick={handleShare}>Share</Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={handleDownload}>Download</Button>
       </div>
       
       <div className="prose prose-sm prose-invert max-w-none">
