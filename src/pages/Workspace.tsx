@@ -386,7 +386,7 @@ function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
                   Add Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-md overflow-hidden">
                 <DialogHeader>
                   <DialogTitle>Invite Team Members</DialogTitle>
                   <DialogDescription>
@@ -395,9 +395,9 @@ function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-2 bg-secondary/50 border border-border rounded-lg px-3 py-2">
+                    <div className="flex-1 flex items-center gap-2 bg-secondary/50 border border-border rounded-lg px-3 py-2 min-w-0 overflow-hidden">
                       <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span className="text-sm truncate">{inviteLink}</span>
+                      <span className="text-sm truncate block w-full">{inviteLink}</span>
                     </div>
                     <Button 
                       variant="outline" 
