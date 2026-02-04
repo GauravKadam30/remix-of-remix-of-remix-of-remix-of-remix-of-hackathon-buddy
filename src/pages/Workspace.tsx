@@ -12,12 +12,25 @@ import {
   Sparkles,
   Clock,
   CheckCircle2,
-  Circle
+  Circle,
+  Copy,
+  Check,
+  Share2,
+  Link2
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
 
 
 interface Project {
@@ -322,6 +335,35 @@ function StageContent({ stage, onAdvance }: StageContentProps) {
 // Stage 1: Manage Team
 function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [copied, setCopied] = useState(false);
+  
+  const inviteLink = `${window.location.origin}/invite/team-abc123`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    toast({
+      title: "Link copied!",
+      description: "Share this link with your teammates",
+    });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join my hackathon team!",
+          text: "You're invited to collaborate on our hackathon project",
+          url: inviteLink,
+        });
+      } catch (err) {
+        // User cancelled or share failed
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
 
   const teamMembers = [
     { id: 1, name: "Alex Chen", role: "Full Stack Developer", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alex" },
@@ -337,10 +379,48 @@ function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
         <div className="bg-card border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Team Members</h3>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Plus className="w-4 h-4" />
-              Add Member
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Add Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Invite Team Members</DialogTitle>
+                  <DialogDescription>
+                    Share this link with teammates to invite them to your project
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 flex items-center gap-2 bg-secondary/50 border border-border rounded-lg px-3 py-2">
+                      <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm truncate">{inviteLink}</span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={handleCopyLink}
+                      className="shrink-0"
+                    >
+                      {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleCopyLink} className="flex-1 gap-2">
+                      <Copy className="w-4 h-4" />
+                      Copy Link
+                    </Button>
+                    <Button onClick={handleShare} variant="outline" className="flex-1 gap-2">
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {teamMembers.map((member) => (
