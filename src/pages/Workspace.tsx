@@ -16,7 +16,9 @@ import {
   Copy,
   Check,
   Share2,
-  Link2
+  Link2,
+  MessageCircle,
+  Send
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -30,6 +32,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { toast, useToast } from "@/hooks/use-toast";
 
 
@@ -801,29 +809,55 @@ An AI-powered mental health companion app that provides personalized emotional s
 }
 
 // Stage 5: Implementation
+interface Comment {
+  id: string;
+  author: string;
+  text: string;
+  timestamp: Date;
+}
+
+interface Task {
+  name: string;
+  done: boolean;
+  comments: Comment[];
+}
+
+interface MemberTasks {
+  id: number;
+  member: string;
+  role: string;
+  tasks: Task[];
+}
+
 function ImplementationStage() {
-  const [tasks, setTasks] = useState([
+  const [tasks, setTasks] = useState<MemberTasks[]>([
     { id: 1, member: "Alex Chen", role: "Full Stack", tasks: [
-      { name: "Set up project structure", done: true },
-      { name: "Configure authentication", done: true },
-      { name: "Implement API routes", done: false },
+      { name: "Set up project structure", done: true, comments: [] },
+      { name: "Configure authentication", done: true, comments: [
+        { id: "1", author: "You", text: "Looking good! Let me know if you need help with OAuth.", timestamp: new Date(Date.now() - 3600000) }
+      ] },
+      { name: "Implement API routes", done: false, comments: [] },
     ]},
     { id: 2, member: "Sarah Kim", role: "ML Engineer", tasks: [
-      { name: "Set up OpenAI integration", done: true },
-      { name: "Implement sentiment analysis", done: false },
-      { name: "Train custom prompts", done: false },
+      { name: "Set up OpenAI integration", done: true, comments: [] },
+      { name: "Implement sentiment analysis", done: false, comments: [] },
+      { name: "Train custom prompts", done: false, comments: [] },
     ]},
     { id: 3, member: "Marcus Johnson", role: "Frontend", tasks: [
-      { name: "Build chat UI", done: true },
-      { name: "Create dashboard", done: true },
-      { name: "Add animations", done: false },
+      { name: "Build chat UI", done: true, comments: [] },
+      { name: "Create dashboard", done: true, comments: [] },
+      { name: "Add animations", done: false, comments: [
+        { id: "2", author: "Emily Zhang", text: "Can you use framer-motion for this?", timestamp: new Date(Date.now() - 7200000) }
+      ] },
     ]},
     { id: 4, member: "Emily Zhang", role: "Backend", tasks: [
-      { name: "Design database schema", done: true },
-      { name: "Set up Supabase", done: true },
-      { name: "Implement RLS policies", done: false },
+      { name: "Design database schema", done: true, comments: [] },
+      { name: "Set up Supabase", done: true, comments: [] },
+      { name: "Implement RLS policies", done: false, comments: [] },
     ]},
   ]);
+
+  const [newComment, setNewComment] = useState("");
 
   const toggleTask = (memberId: number, taskIndex: number) => {
     setTasks(prev => prev.map(member => 
@@ -838,9 +872,42 @@ function ImplementationStage() {
     ));
   };
 
+  const addComment = (memberId: number, taskIndex: number, text: string) => {
+    if (!text.trim()) return;
+    
+    const comment: Comment = {
+      id: Date.now().toString(),
+      author: "You",
+      text: text.trim(),
+      timestamp: new Date(),
+    };
+
+    setTasks(prev => prev.map(member => 
+      member.id === memberId 
+        ? {
+            ...member,
+            tasks: member.tasks.map((task, i) => 
+              i === taskIndex ? { ...task, comments: [...task.comments, comment] } : task
+            )
+          }
+        : member
+    ));
+    setNewComment("");
+    toast({ title: "Comment added", description: "Your comment has been posted." });
+  };
+
   const totalTasks = tasks.reduce((acc, m) => acc + m.tasks.length, 0);
   const completedTasks = tasks.reduce((acc, m) => acc + m.tasks.filter(t => t.done).length, 0);
   const progress = Math.round((completedTasks / totalTasks) * 100);
+
+  const formatTime = (date: Date) => {
+    const diff = Date.now() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <div className="space-y-6">
@@ -884,21 +951,77 @@ function ImplementationStage() {
             </div>
             <div className="space-y-2">
               {member.tasks.map((task, i) => (
-                <button
-                  key={i}
-                  onClick={() => toggleTask(member.id, i)}
-                  className="flex items-center gap-2 p-2 bg-secondary/50 rounded-lg w-full text-left hover:bg-secondary/70 transition-colors"
-                >
-                  <div className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors",
-                    task.done ? "bg-success" : "border border-muted-foreground hover:border-primary"
-                  )}>
-                    {task.done && <CheckCircle2 className="w-3 h-3 text-success-foreground" />}
-                  </div>
-                  <span className={cn("text-sm transition-all", task.done && "line-through text-muted-foreground")}>
-                    {task.name}
-                  </span>
-                </button>
+                <div key={i} className="flex items-center gap-2 p-2 bg-secondary/50 rounded-lg">
+                  <button
+                    onClick={() => toggleTask(member.id, i)}
+                    className="flex items-center gap-2 flex-1 text-left"
+                  >
+                    <div className={cn(
+                      "w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors",
+                      task.done ? "bg-success" : "border border-muted-foreground hover:border-primary"
+                    )}>
+                      {task.done && <CheckCircle2 className="w-3 h-3 text-success-foreground" />}
+                    </div>
+                    <span className={cn("text-sm transition-all", task.done && "line-through text-muted-foreground")}>
+                      {task.name}
+                    </span>
+                  </button>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="p-1 hover:bg-secondary rounded transition-colors relative">
+                        <MessageCircle className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                        {task.comments.length > 0 && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
+                            {task.comments.length}
+                          </span>
+                        )}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80" align="end">
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm">Comments</h4>
+                        
+                        {task.comments.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">No comments yet</p>
+                        ) : (
+                          <div className="space-y-3 max-h-48 overflow-y-auto">
+                            {task.comments.map((comment) => (
+                              <div key={comment.id} className="bg-secondary/50 rounded-lg p-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-medium">{comment.author}</span>
+                                  <span className="text-[10px] text-muted-foreground">{formatTime(comment.timestamp)}</span>
+                                </div>
+                                <p className="text-sm">{comment.text}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        <div className="flex gap-2 pt-2 border-t border-border">
+                          <Input
+                            placeholder="Add a comment..."
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                addComment(member.id, i, newComment);
+                              }
+                            }}
+                            className="text-sm h-8"
+                          />
+                          <Button 
+                            size="sm" 
+                            className="h-8 px-2"
+                            onClick={() => addComment(member.id, i, newComment)}
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               ))}
             </div>
           </div>
