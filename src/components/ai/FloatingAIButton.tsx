@@ -1,12 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, Send, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAI } from "@/contexts/AIContext";
 
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
 export function FloatingAIButton() {
   const { isOpen, setIsOpen, openWithMessage, setOpenWithMessage } = useAI();
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
 
   // Auto-open when there's a message to show
   useEffect(() => {
@@ -18,6 +27,46 @@ export function FloatingAIButton() {
   const handleClose = () => {
     setIsOpen(false);
     setOpenWithMessage(undefined);
+  };
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input.trim(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
+
+    // Simulate AI response
+    setTimeout(() => {
+      const responses = [
+        "That's a great question! Let me help you with that. Based on your query, I'd recommend starting with a clear problem statement and then breaking it down into smaller tasks.",
+        "I understand what you're looking for. Here are some suggestions that might help you move forward with your hackathon project.",
+        "Interesting! Let me think about the best approach for this. Would you like me to help you brainstorm some ideas or dive into the technical implementation?",
+        "Great thinking! I can definitely assist you with that. Let's work through this step by step to ensure we cover all the important aspects.",
+      ];
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: responses[Math.floor(Math.random() * responses.length)],
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
@@ -124,6 +173,49 @@ export function FloatingAIButton() {
                     )}
                   </div>
                 </div>
+
+                {/* Conversation Messages */}
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex gap-3",
+                      message.role === "user" && "flex-row-reverse"
+                    )}
+                  >
+                    {message.role === "assistant" && (
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                      </div>
+                    )}
+                    <div
+                      className={cn(
+                        "rounded-2xl p-4 max-w-[85%]",
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground rounded-tr-sm"
+                          : "glass rounded-tl-sm"
+                      )}
+                    >
+                      <p className="text-sm">{message.content}</p>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="glass rounded-2xl rounded-tl-sm p-4">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Input Area */}
@@ -132,6 +224,9 @@ export function FloatingAIButton() {
                   <div className="flex-1 relative">
                     <input
                       type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       placeholder="Ask anything..."
                       className="w-full bg-secondary/50 border border-border rounded-full px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
                     />
@@ -142,6 +237,8 @@ export function FloatingAIButton() {
                   <Button
                     size="icon"
                     className="rounded-full w-12 h-12"
+                    onClick={handleSend}
+                    disabled={!input.trim() || isTyping}
                   >
                     <Send className="w-5 h-5" />
                   </Button>
