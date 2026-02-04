@@ -523,11 +523,12 @@ function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
 // Stage 2: Research
 function ResearchStage({ onAdvance }: { onAdvance: () => void }) {
   const [researchTasks, setResearchTasks] = useState([
-    { id: 1, member: "Alex Chen", topic: "Existing mental health apps analysis", completed: true, fileName: "mental_health_apps.pdf" },
-    { id: 2, member: "Sarah Kim", topic: "NLP sentiment analysis techniques", completed: true, fileName: "nlp_techniques.pdf" },
-    { id: 3, member: "Marcus Johnson", topic: "Accessibility standards for mental health apps", completed: false, fileName: null as string | null },
-    { id: 4, member: "Emily Zhang", topic: "Data privacy and HIPAA compliance", completed: false, fileName: null as string | null },
+    { id: 1, member: "Alex Chen", topic: "Existing mental health apps analysis", completed: true, fileName: "mental_health_apps.pdf", fileUrl: null as string | null },
+    { id: 2, member: "Sarah Kim", topic: "NLP sentiment analysis techniques", completed: true, fileName: "nlp_techniques.pdf", fileUrl: null as string | null },
+    { id: 3, member: "Marcus Johnson", topic: "Accessibility standards for mental health apps", completed: false, fileName: null as string | null, fileUrl: null as string | null },
+    { id: 4, member: "Emily Zhang", topic: "Data privacy and HIPAA compliance", completed: false, fileName: null as string | null, fileUrl: null as string | null },
   ]);
+  const [viewingFile, setViewingFile] = useState<{ fileName: string; fileUrl: string } | null>(null);
 
   const handleFileUpload = (taskId: number, file: File) => {
     if (file.type !== "application/pdf") {
@@ -539,12 +540,19 @@ function ResearchStage({ onAdvance }: { onAdvance: () => void }) {
       return;
     }
 
+    const fileUrl = URL.createObjectURL(file);
+
     setResearchTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId
-          ? { ...task, completed: true, fileName: file.name }
-          : task
-      )
+      prev.map((task) => {
+        if (task.id === taskId) {
+          // Revoke old URL if exists
+          if (task.fileUrl) {
+            URL.revokeObjectURL(task.fileUrl);
+          }
+          return { ...task, completed: true, fileName: file.name, fileUrl };
+        }
+        return task;
+      })
     );
 
     toast({
@@ -554,10 +562,12 @@ function ResearchStage({ onAdvance }: { onAdvance: () => void }) {
   };
 
   const handleViewFile = (task: typeof researchTasks[0]) => {
-    if (task.fileName) {
+    if (task.fileUrl && task.fileName) {
+      setViewingFile({ fileName: task.fileName, fileUrl: task.fileUrl });
+    } else if (task.fileName && !task.fileUrl) {
       toast({
-        title: "Viewing file",
-        description: `Opening "${task.fileName}"...`,
+        title: "File not available",
+        description: "This is a demo file. Upload a real PDF to view it.",
       });
     } else {
       toast({
@@ -570,6 +580,23 @@ function ResearchStage({ onAdvance }: { onAdvance: () => void }) {
 
   return (
     <div className="space-y-6">
+      {/* PDF Viewer Dialog */}
+      <Dialog open={!!viewingFile} onOpenChange={(open) => !open && setViewingFile(null)}>
+        <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>{viewingFile?.fileName}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0">
+            {viewingFile?.fileUrl && (
+              <iframe
+                src={viewingFile.fileUrl}
+                className="w-full h-full rounded-md border"
+                title={viewingFile.fileName}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="font-semibold mb-4">Research Tasks</h3>
         <div className="grid md:grid-cols-2 gap-4">
