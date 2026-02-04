@@ -1027,6 +1027,55 @@ function ImplementationStage() {
           </div>
         ))}
       </div>
+
+      {/* Role-Based Stats */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="font-semibold mb-4">Role Performance</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {tasks.map((member) => {
+            const memberCompleted = member.tasks.filter(t => t.done).length;
+            const memberTotal = member.tasks.length;
+            const memberProgress = Math.round((memberCompleted / memberTotal) * 100);
+            const totalComments = member.tasks.reduce((acc, t) => acc + t.comments.length, 0);
+            
+            return (
+              <div key={member.id} className="bg-secondary/30 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "w-2 h-2 rounded-full",
+                    memberProgress === 100 ? "bg-success" : memberProgress >= 50 ? "bg-primary" : "bg-muted-foreground"
+                  )} />
+                  <span className="text-xs font-medium text-muted-foreground">{member.role}</span>
+                </div>
+                
+                <div>
+                  <p className="text-2xl font-bold">{memberProgress}%</p>
+                  <p className="text-xs text-muted-foreground">completed</p>
+                </div>
+                
+                <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${memberProgress}%` }}
+                    className={cn(
+                      "h-full rounded-full",
+                      memberProgress === 100 ? "bg-success" : "bg-primary"
+                    )}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border/50">
+                  <span>{memberCompleted}/{memberTotal} tasks</span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="w-3 h-3" />
+                    {totalComments}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
