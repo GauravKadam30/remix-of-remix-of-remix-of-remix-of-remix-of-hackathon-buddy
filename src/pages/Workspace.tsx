@@ -522,12 +522,51 @@ function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
 
 // Stage 2: Research
 function ResearchStage({ onAdvance }: { onAdvance: () => void }) {
-  const researchTasks = [
-    { id: 1, member: "Alex Chen", topic: "Existing mental health apps analysis", completed: true },
-    { id: 2, member: "Sarah Kim", topic: "NLP sentiment analysis techniques", completed: true },
-    { id: 3, member: "Marcus Johnson", topic: "Accessibility standards for mental health apps", completed: false },
-    { id: 4, member: "Emily Zhang", topic: "Data privacy and HIPAA compliance", completed: false },
-  ];
+  const [researchTasks, setResearchTasks] = useState([
+    { id: 1, member: "Alex Chen", topic: "Existing mental health apps analysis", completed: true, fileName: "mental_health_apps.pdf" },
+    { id: 2, member: "Sarah Kim", topic: "NLP sentiment analysis techniques", completed: true, fileName: "nlp_techniques.pdf" },
+    { id: 3, member: "Marcus Johnson", topic: "Accessibility standards for mental health apps", completed: false, fileName: null as string | null },
+    { id: 4, member: "Emily Zhang", topic: "Data privacy and HIPAA compliance", completed: false, fileName: null as string | null },
+  ]);
+
+  const handleFileUpload = (taskId: number, file: File) => {
+    if (file.type !== "application/pdf") {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResearchTasks((prev) =>
+      prev.map((task) =>
+        task.id === taskId
+          ? { ...task, completed: true, fileName: file.name }
+          : task
+      )
+    );
+
+    toast({
+      title: "File uploaded successfully",
+      description: `"${file.name}" has been uploaded for this research task.`,
+    });
+  };
+
+  const handleViewFile = (task: typeof researchTasks[0]) => {
+    if (task.fileName) {
+      toast({
+        title: "Viewing file",
+        description: `Opening "${task.fileName}"...`,
+      });
+    } else {
+      toast({
+        title: "No file uploaded",
+        description: "Please upload a PDF file first.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -549,10 +588,40 @@ function ResearchStage({ onAdvance }: { onAdvance: () => void }) {
                 </div>
                 <span className="text-sm font-medium">{task.member}</span>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">{task.topic}</p>
+              <p className="text-sm text-muted-foreground mb-2">{task.topic}</p>
+              {task.fileName && (
+                <p className="text-xs text-primary mb-3 truncate" title={task.fileName}>
+                  📎 {task.fileName}
+                </p>
+              )}
+              {!task.fileName && <div className="mb-3" />}
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">Upload PDF</Button>
-                <Button variant="outline" size="sm" className="flex-1">View</Button>
+                <label className="flex-1">
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFileUpload(task.id, file);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <Button variant="outline" size="sm" className="w-full" asChild>
+                    <span>{task.completed ? "Replace PDF" : "Upload PDF"}</span>
+                  </Button>
+                </label>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleViewFile(task)}
+                  disabled={!task.fileName}
+                >
+                  View
+                </Button>
               </div>
             </div>
           ))}
