@@ -394,21 +394,30 @@ function ManageTeamStage({ onAdvance }: { onAdvance: () => void }) {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 flex items-center gap-2 bg-secondary/50 border border-border rounded-lg px-3 py-2 min-w-0 overflow-hidden">
-                      <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span className="text-sm truncate block w-full">{inviteLink}</span>
+                  <div className="flex items-center gap-2 w-full">
+                    <div className="flex-1 min-w-0 flex items-center gap-2 bg-secondary/50 border border-border rounded-lg px-3 py-2">
+                      <Link2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span 
+                        className="text-sm flex-1 min-w-0"
+                        style={{ 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap' 
+                        }}
+                      >
+                        {inviteLink}
+                      </span>
                     </div>
                     <Button 
                       variant="outline" 
                       size="icon"
                       onClick={handleCopyLink}
-                      className="shrink-0"
+                      className="flex-shrink-0"
                     >
                       {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                     </Button>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full">
                     <Button onClick={handleCopyLink} className="flex-1 gap-2">
                       <Copy className="w-4 h-4" />
                       Copy Link
