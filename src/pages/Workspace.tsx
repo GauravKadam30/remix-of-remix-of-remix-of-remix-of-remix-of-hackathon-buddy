@@ -18,7 +18,8 @@ import {
   Share2,
   Link2,
   MessageCircle,
-  Send
+  Send,
+  Pencil
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -91,6 +92,8 @@ export default function Workspace() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   // Handle new project from Explore page
   useEffect(() => {
@@ -163,13 +166,55 @@ export default function Workspace() {
               className="bg-card border border-border rounded-xl p-6 hover:border-primary/30 transition-all cursor-pointer group"
             >
               <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                    {project.name}
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  {editingProjectId === project.id ? (
+                    <Input
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onBlur={() => {
+                        if (editingName.trim()) {
+                          setProjects(prev => prev.map(p => 
+                            p.id === project.id ? { ...p, name: editingName.trim() } : p
+                          ));
+                        }
+                        setEditingProjectId(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          if (editingName.trim()) {
+                            setProjects(prev => prev.map(p => 
+                              p.id === project.id ? { ...p, name: editingName.trim() } : p
+                            ));
+                          }
+                          setEditingProjectId(null);
+                        } else if (e.key === "Escape") {
+                          setEditingProjectId(null);
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                      className="h-8 text-lg font-semibold"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg group-hover:text-primary transition-colors truncate">
+                        {project.name}
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingProjectId(project.id);
+                          setEditingName(project.name);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-secondary transition-all"
+                      >
+                        <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                      </button>
+                    </div>
+                  )}
                   <p className="text-sm text-muted-foreground">{project.hackathon}</p>
                 </div>
-                <Badge className="bg-primary/10 text-primary border-primary/20">
+                <Badge className="bg-primary/10 text-primary border-primary/20 shrink-0 ml-2">
                   {project.stageLabel}
                 </Badge>
               </div>
