@@ -647,7 +647,7 @@ function ResearchStage({ onAdvance }: { onAdvance: () => void }) {
         </div>
       </div>
       
-      <div className="flex justify-end">
+      <div className="flex justify-start">
         <Button onClick={onAdvance} className="gap-2">
           Continue to Ideation
           <ChevronRight className="w-4 h-4" />
