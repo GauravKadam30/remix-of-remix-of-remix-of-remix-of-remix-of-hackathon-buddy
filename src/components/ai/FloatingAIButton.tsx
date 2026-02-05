@@ -16,6 +16,7 @@ export function FloatingAIButton() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Auto-open when there's a message to show
   useEffect(() => {
@@ -71,19 +72,30 @@ export function FloatingAIButton() {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - Draggable */}
       <motion.button
-        onClick={() => setIsOpen(true)}
+        drag
+        dragMomentum={false}
+        dragElastic={0.1}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={() => {
+          setTimeout(() => setIsDragging(false), 100);
+        }}
+        onClick={() => {
+          if (!isDragging) {
+            setIsOpen(true);
+          }
+        }}
         className={cn(
-          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full",
+          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full cursor-grab active:cursor-grabbing",
           "bg-primary text-primary-foreground",
           "flex items-center justify-center",
           "shadow-lg animate-pulse-glow",
-          "hover:scale-110 transition-transform",
+          "hover:scale-110 transition-transform touch-none",
           isOpen && "hidden"
         )}
         whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileDrag={{ scale: 1.15, boxShadow: "0 10px 30px rgba(0,0,0,0.3)" }}
       >
         <Sparkles className="w-6 h-6" />
       </motion.button>
