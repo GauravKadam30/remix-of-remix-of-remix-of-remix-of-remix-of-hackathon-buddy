@@ -123,10 +123,23 @@ export default function Workspace() {
     }
   }, [location.state, navigate, location.pathname]);
 
+  const handleUpdateProjectName = (projectId: number, newName: string) => {
+    setProjects(prev => prev.map(p => 
+      p.id === projectId ? { ...p, name: newName } : p
+    ));
+  };
+
   if (selectedProject) {
     const project = projects.find(p => p.id === selectedProject);
     if (project) {
-      return <ProjectWorkspace projectId={selectedProject} project={project} onBack={() => setSelectedProject(null)} />;
+      return (
+        <ProjectWorkspace 
+          projectId={selectedProject} 
+          project={project} 
+          onBack={() => setSelectedProject(null)}
+          onUpdateName={(newName) => handleUpdateProjectName(selectedProject, newName)}
+        />
+      );
     }
   }
 
@@ -276,10 +289,22 @@ interface ProjectWorkspaceProps {
   projectId: number;
   project: Project;
   onBack: () => void;
+  onUpdateName: (newName: string) => void;
 }
 
-function ProjectWorkspace({ project, onBack }: ProjectWorkspaceProps) {
+function ProjectWorkspace({ project, onBack, onUpdateName }: ProjectWorkspaceProps) {
   const [currentStage, setCurrentStage] = useState(project.stage);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState(project.name);
+
+  const handleSaveName = () => {
+    if (editName.trim()) {
+      onUpdateName(editName.trim());
+    } else {
+      setEditName(project.name);
+    }
+    setIsEditingName(false);
+  };
 
   return (
     <MainLayout>
@@ -291,7 +316,35 @@ function ProjectWorkspace({ project, onBack }: ProjectWorkspaceProps) {
             Back
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{project.name}</h1>
+            {isEditingName ? (
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onBlur={handleSaveName}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveName();
+                  else if (e.key === "Escape") {
+                    setEditName(project.name);
+                    setIsEditingName(false);
+                  }
+                }}
+                autoFocus
+                className="text-2xl font-bold h-10 max-w-md"
+              />
+            ) : (
+              <div className="flex items-center gap-2 group/name">
+                <h1 className="text-2xl font-bold">{project.name}</h1>
+                <button
+                  onClick={() => {
+                    setEditName(project.name);
+                    setIsEditingName(true);
+                  }}
+                  className="opacity-0 group-hover/name:opacity-100 p-1 rounded hover:bg-secondary transition-all"
+                >
+                  <Pencil className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">{project.hackathon}</p>
           </div>
           <Badge className="gap-1 bg-primary/10 text-primary border-primary/20">
