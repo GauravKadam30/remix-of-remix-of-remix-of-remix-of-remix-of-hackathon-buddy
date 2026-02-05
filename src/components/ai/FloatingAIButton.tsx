@@ -76,7 +76,13 @@ export function FloatingAIButton() {
       <motion.button
         drag
         dragMomentum={false}
-        dragElastic={0.1}
+        dragElastic={0}
+        dragConstraints={{
+          top: -window.innerHeight + 80,
+          left: -window.innerWidth + 80,
+          right: 0,
+          bottom: 0,
+        }}
         onDragStart={() => setIsDragging(true)}
         onDragEnd={() => {
           setTimeout(() => setIsDragging(false), 100);
