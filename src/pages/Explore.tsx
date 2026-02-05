@@ -359,7 +359,10 @@ export default function Explore() {
                   </Button>
                   <Button 
                     className="gap-2"
-                    onClick={() => handleStartProject(hackathon)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartProject(hackathon);
+                    }}
                   >
                     Start Project
                     <ChevronRight className="w-4 h-4" />
