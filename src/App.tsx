@@ -11,6 +11,7 @@ import UserProfile from "./pages/UserProfile";
 import Messages from "./pages/Messages";
 import Workspace from "./pages/Workspace";
 import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
