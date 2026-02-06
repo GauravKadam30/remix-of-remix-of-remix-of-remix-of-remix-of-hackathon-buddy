@@ -10,6 +10,7 @@ import CreateTeam from "./pages/CreateTeam";
 import UserProfile from "./pages/UserProfile";
 import Messages from "./pages/Messages";
 import Workspace from "./pages/Workspace";
+import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
