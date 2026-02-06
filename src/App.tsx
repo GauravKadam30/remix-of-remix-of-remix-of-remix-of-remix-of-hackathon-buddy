@@ -29,6 +29,7 @@ const App = () => (
             <Route path="/profile/:id" element={<UserProfile />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/workspace" element={<Workspace />} />
+            <Route path="/signup" element={<SignUp />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
