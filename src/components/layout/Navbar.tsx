@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { 
   Compass, 
@@ -86,7 +87,11 @@ export function Navbar() {
             })}
           </div>
 
-          {/* Profile Menu */}
+          {/* Sign Up & Profile Menu */}
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="rounded-full">
+              <Link to="/signup">Sign Up</Link>
+            </Button>
           <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 p-1.5 rounded-full hover:bg-secondary transition-colors">
@@ -120,6 +125,7 @@ export function Navbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
       </div>
     </nav>
