@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
-  User, 
+  Mail, 
   Lock, 
   Upload, 
   FileText, 
@@ -23,8 +23,10 @@ import {
   MapPin, 
   Briefcase,
   Sparkles,
-  Plus
+  Plus,
+  ArrowRight
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 const availabilityOptions = [
@@ -61,7 +63,8 @@ export default function SignUp() {
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [accountContinued, setAccountContinued] = useState(false);
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [headline, setHeadline] = useState("");
@@ -136,19 +139,30 @@ export default function SignUp() {
     setSkills(skills.filter((skill) => skill !== skillToRemove));
   };
 
+  const handleContinue = () => {
+    if (!email || !password) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in email and password to continue",
+        variant: "destructive",
+      });
+      return;
+    }
+    setAccountContinued(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !password || !fullName) {
+    if (!email || !password || !fullName) {
       toast({
         title: "Missing required fields",
-        description: "Please fill in username, password, and full name",
+        description: "Please fill in email, password, and full name",
         variant: "destructive",
       });
       return;
     }
 
-    // For now, just show success and navigate
     toast({
       title: "Profile created!",
       description: "Welcome to HackPilot",
@@ -174,22 +188,24 @@ export default function SignUp() {
               {/* Section 1 - Account Credentials */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-                  <User className="w-4 h-4 text-primary" />
+                  <Mail className="w-4 h-4 text-primary" />
                   <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
                     Account Credentials
                   </h2>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Username *</Label>
+                    <Label htmlFor="email">Email *</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
-                        id="username"
-                        placeholder="johndoe"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="pl-10 h-11 rounded-lg"
+                        disabled={accountContinued}
                       />
                     </div>
                   </div>
@@ -204,19 +220,33 @@ export default function SignUp() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="pl-10 h-11 rounded-lg"
+                        disabled={accountContinued}
                       />
                     </div>
                   </div>
                 </div>
+                {!accountContinued && (
+                  <Button
+                    type="button"
+                    onClick={handleContinue}
+                    className="w-full h-11 rounded-lg gap-2"
+                  >
+                    Continue
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
 
               {/* Section 2 - Personal Information */}
-              <div className="space-y-4">
+              <div className={cn("space-y-4 transition-opacity duration-300", !accountContinued && "opacity-50 pointer-events-none")}>
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                   <Briefcase className="w-4 h-4 text-primary" />
                   <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
                     Personal Information
                   </h2>
+                  {!accountContinued && (
+                    <span className="ml-auto text-xs text-muted-foreground">Complete credentials to unlock</span>
+                  )}
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
@@ -227,6 +257,7 @@ export default function SignUp() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="h-11 rounded-lg"
+                      disabled={!accountContinued}
                     />
                   </div>
                   <div className="space-y-2">
@@ -239,6 +270,7 @@ export default function SignUp() {
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         className="pl-10 h-11 rounded-lg"
+                        disabled={!accountContinued}
                       />
                     </div>
                   </div>
@@ -251,6 +283,7 @@ export default function SignUp() {
                     value={headline}
                     onChange={(e) => setHeadline(e.target.value)}
                     className="h-11 rounded-lg"
+                    disabled={!accountContinued}
                   />
                 </div>
                 <div className="space-y-2">
@@ -261,12 +294,13 @@ export default function SignUp() {
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     className="min-h-[100px] rounded-lg resize-none"
+                    disabled={!accountContinued}
                   />
                 </div>
               </div>
 
               {/* Section 3 - Media Uploads */}
-              <div className="space-y-4">
+              <div className={cn("space-y-4 transition-opacity duration-300", !accountContinued && "opacity-50 pointer-events-none")}>
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                   <Upload className="w-4 h-4 text-primary" />
                   <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
@@ -283,7 +317,7 @@ export default function SignUp() {
                           <AvatarImage src={avatarPreview} alt="Avatar preview" />
                         ) : (
                           <AvatarFallback className="bg-muted">
-                            <User className="w-8 h-8 text-muted-foreground" />
+                            <Mail className="w-8 h-8 text-muted-foreground" />
                           </AvatarFallback>
                         )}
                       </Avatar>
@@ -354,7 +388,7 @@ export default function SignUp() {
               </div>
 
               {/* Section 4 - Professional Details */}
-              <div className="space-y-4">
+              <div className={cn("space-y-4 transition-opacity duration-300", !accountContinued && "opacity-50 pointer-events-none")}>
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                   <Briefcase className="w-4 h-4 text-primary" />
                   <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
@@ -396,7 +430,7 @@ export default function SignUp() {
               </div>
 
               {/* Section 5 - Skills */}
-              <div className="space-y-4">
+              <div className={cn("space-y-4 transition-opacity duration-300", !accountContinued && "opacity-50 pointer-events-none")}>
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                   <Sparkles className="w-4 h-4 text-primary" />
                   <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
