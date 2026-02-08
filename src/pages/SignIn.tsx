@@ -7,9 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Lock, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -73,11 +75,12 @@ const SignIn = () => {
     
     // Mock authentication - replace with real auth logic
     if (formData.username === "demo" && formData.password === "password") {
+      signIn();
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
-      navigate("/");
+      navigate("/explore");
     } else {
       setAuthError("Invalid username or password. Please try again.");
     }

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { name: "Explore", path: "/explore", icon: Compass },
@@ -30,6 +31,7 @@ const navItems = [
 
 export function Navbar() {
   const location = useLocation();
+  const { isAuthenticated, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -87,11 +89,17 @@ export function Navbar() {
             })}
           </div>
 
-          {/* Sign Up & Profile Menu */}
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="rounded-full">
-              <Link to="/signup">Sign Up</Link>
-            </Button>
+            {!isAuthenticated && (
+              <>
+                <Button asChild variant="ghost" size="sm" className="rounded-full">
+                  <Link to="/signin">Sign In</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Link to="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
           <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 p-1.5 rounded-full hover:bg-secondary transition-colors">
@@ -119,7 +127,10 @@ export function Navbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                onClick={() => signOut()}
+              >
                 <LogOut className="w-4 h-4" />
                 Logout
               </DropdownMenuItem>
