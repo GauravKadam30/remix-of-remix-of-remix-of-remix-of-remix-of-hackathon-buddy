@@ -165,9 +165,9 @@ export default function SignUp() {
 
     toast({
       title: "Profile created!",
-      description: "Welcome to HackPilot",
+      description: "Please sign in to continue",
     });
-    navigate("/");
+    navigate("/signin");
   };
 
   return (
@@ -485,7 +485,7 @@ export default function SignUp() {
                   <button
                     type="button"
                     className="text-primary hover:underline font-medium"
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/signin")}
                   >
                     Sign in
                   </button>
