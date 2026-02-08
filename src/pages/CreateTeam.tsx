@@ -24,93 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-const users = [
-  {
-    id: 1,
-    name: "Alex Chen",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alex",
-    role: "Full Stack Developer",
-    skills: ["React", "Node.js", "Python", "TensorFlow"],
-    experience: "Intermediate",
-    hackathonsWon: 5,
-    projects: 12,
-    location: "San Francisco, CA",
-    available: true,
-    bio: "Passionate about building AI-powered applications. Love hackathons!",
-  },
-  {
-    id: 2,
-    name: "Sarah Kim",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarah",
-    role: "ML Engineer",
-    skills: ["PyTorch", "Scikit-learn", "FastAPI", "Docker"],
-    experience: "Advanced",
-    hackathonsWon: 8,
-    projects: 20,
-    location: "Seattle, WA",
-    available: true,
-    bio: "Machine learning enthusiast specializing in NLP and computer vision.",
-  },
-  {
-    id: 3,
-    name: "Marcus Johnson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=marcus",
-    role: "Frontend Developer",
-    skills: ["React", "TypeScript", "Tailwind", "Figma"],
-    experience: "Intermediate",
-    hackathonsWon: 3,
-    projects: 8,
-    location: "Austin, TX",
-    available: true,
-    bio: "UI/UX focused developer with a keen eye for design and animations.",
-  },
-  {
-    id: 4,
-    name: "Emily Zhang",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emily",
-    role: "Backend Developer",
-    skills: ["Go", "PostgreSQL", "Redis", "Kubernetes"],
-    experience: "Advanced",
-    hackathonsWon: 6,
-    projects: 15,
-    location: "New York, NY",
-    available: false,
-    bio: "Building scalable systems at scale. Open source contributor.",
-  },
-  {
-    id: 5,
-    name: "David Park",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=david",
-    role: "Product Designer",
-    skills: ["Figma", "Framer", "Prototyping", "User Research"],
-    experience: "Intermediate",
-    hackathonsWon: 4,
-    projects: 10,
-    location: "Los Angeles, CA",
-    available: true,
-    bio: "Turning complex problems into simple, beautiful solutions.",
-  },
-  {
-    id: 6,
-    name: "Lisa Wang",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=lisa",
-    role: "Data Scientist",
-    skills: ["Python", "R", "SQL", "Tableau"],
-    experience: "Beginner",
-    hackathonsWon: 1,
-    projects: 5,
-    location: "Boston, MA",
-    available: true,
-    bio: "Data-driven problem solver. First hackathon experience was amazing!",
-  },
-];
-
-const experienceColors: Record<string, string> = {
-  Beginner: "bg-green-500/10 text-green-400 border-green-500/20",
-  Intermediate: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  Advanced: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-};
+import { users, ALLOWED_ML_SKILLS, experienceColors } from "@/data/users";
 
 export default function CreateTeam() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -135,14 +49,10 @@ export default function CreateTeam() {
   const filteredUsers = useMemo(() => {
     if (!debouncedQuery.trim()) return users;
     
-    const query = debouncedQuery.toLowerCase();
-    return users.filter((user) => 
-      user.name.toLowerCase().includes(query) ||
-      user.role.toLowerCase().includes(query) ||
-      user.skills.some(skill => skill.toLowerCase().includes(query)) ||
-      user.location.toLowerCase().includes(query) ||
-      user.bio.toLowerCase().includes(query) ||
-      user.experience.toLowerCase().includes(query)
+    // When any text is entered, show only users with at least one allowed ML/AI skill
+    const allowedLower = ALLOWED_ML_SKILLS.map(s => s.toLowerCase());
+    return users.filter((user) =>
+      user.skills.some(skill => allowedLower.includes(skill.toLowerCase()))
     );
   }, [debouncedQuery]);
 
@@ -356,8 +266,8 @@ export default function CreateTeam() {
             <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
               <Search className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No teammates found</h3>
-            <p className="text-muted-foreground mb-4">Try adjusting your search or filters</p>
+            <h3 className="text-lg font-semibold mb-2">No ML/AI users found</h3>
+            <p className="text-muted-foreground mb-4">No users with ML/AI skills available</p>
             <Button variant="outline" onClick={() => setSearchQuery("")}>
               Clear Search
             </Button>
